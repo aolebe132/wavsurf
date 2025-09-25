@@ -28,16 +28,16 @@ class FileAnalyzer():
             data = data[:, 0]
         else:
             pass
-
+        
         num_samples = data.shape[0]
-        duration_sec = round(num_samples/sr)
-        beats_total = (duration_sec/60)*bpm
-        divisions = beats_total*32
-
+        duration_sec = (num_samples/sr)
+        beats_total = int((duration_sec/60)*bpm)
+        divisions = beats_total*int(sr/10)
+        print(f'{num_samples}, {duration_sec}, {beats_total}, {divisions}')
         freqList = []
         for st in range(divisions): 
-            start_time = st*(duration_sec/(beats_total*32))
-            end_time = None
+            start_time = st*(duration_sec/divisions)
+            end_time = start_time +(duration_sec/divisions)
             # Return a slice of the data from start_time to end_time
             dataToRead = data[int(start_time * sr / 1000) : int(end_time * sr / 1000) + 1]
 
@@ -75,6 +75,6 @@ class FileAnalyzer():
         plt.show()
 
 reader = FileAnalyzer('./numb20.wav')
-
+print(reader.freq(63))
 #print(reader.refTable)
 
