@@ -15,12 +15,15 @@ import matplotlib.pyplot as plt
 # 5. write out as tab (create standard format)
 
 class FileAnalyzer():
-    def __init__(self, wav_fname):   
+    def __init__(self, wav_fname, bpm):   
         self.file = wav_fname
-        self.refTable = np.loadtxt('./note_freq.csv',delimiter =',')
+        #get values from csv (flipped to use freq as key and note as val)
+        self.ref = {k:v for v,k in np.loadtxt('./note_freq.csv',delimiter =',')}
+        self.bpm = bpm
+        #print(self.ref)
  
 
-    def freq(self, bpm):
+    def freq(self):
 
         # Open the file and convert to mono
         sr, data = wavfile.read(self.file)
@@ -31,7 +34,7 @@ class FileAnalyzer():
         
         num_samples = data.shape[0]
         duration_sec = (num_samples/sr)
-        beats_total = int((duration_sec/60)*bpm)
+        beats_total = int((duration_sec/60)*self.bpm)
         divisions = beats_total*int(sr/10)
         print(f'{num_samples}, {duration_sec}, {beats_total}, {divisions}')
         freqList = []
@@ -57,7 +60,11 @@ class FileAnalyzer():
         
         return np.array(freqList)
     
-    
+    def assignNotes(self):
+        input = self.freq()
+
+        
+
 
     def graph(self):
         samplerate, data = wavfile.read(self.file)
@@ -74,7 +81,7 @@ class FileAnalyzer():
         plt.ylabel("Amplitude")
         plt.show()
 
-reader = FileAnalyzer('./numb20.wav')
-print(reader.freq(63))
+reader = FileAnalyzer('./numb20.wav',63)
+
 #print(reader.refTable)
 
