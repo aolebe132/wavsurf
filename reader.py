@@ -20,7 +20,7 @@ class FileAnalyzer():
         self.refTable = np.loadtxt('./note_freq.csv',delimiter =',')
  
 
-    def freq(self, start_time, end_time):
+    def freq(self, bpm):
 
         # Open the file and convert to mono
         sr, data = wavfile.read(self.file)
@@ -29,22 +29,33 @@ class FileAnalyzer():
         else:
             pass
 
-        # Return a slice of the data from start_time to end_time
-        dataToRead = data[int(start_time * sr / 1000) : int(end_time * sr / 1000) + 1]
+        num_samples = data.shape[0]
+        duration_sec = round(num_samples/sr)
+        beats_total = (duration_sec/60)*bpm
+        divisions = beats_total*32
 
-        # Fourier Transform
-        N = len(dataToRead)
-        yf = rfft(dataToRead)
-        xf = rfftfreq(N, 1 / sr)
+        freqList = []
+        for st in range(divisions): 
+            start_time = st*(duration_sec/(beats_total*32))
+            end_time = None
+            # Return a slice of the data from start_time to end_time
+            dataToRead = data[int(start_time * sr / 1000) : int(end_time * sr / 1000) + 1]
 
-        # Uncomment these to see the frequency spectrum as a plot
-        # plt.plot(xf, np.abs(yf))
-        # plt.show()
+            # Fourier Transform
+            N = len(dataToRead)
+            yf = rfft(dataToRead)
+            xf = rfftfreq(N, 1 / sr)
 
-        # Get the most dominant frequency and return it
-        idx = np.argmax(np.abs(yf))
-        freq = xf[idx]
-        return freq
+            # Uncomment these to see the frequency spectrum as a plot
+            # plt.plot(xf, np.abs(yf))
+            # plt.show()
+
+            # Get the most dominant frequency and return it
+            idx = np.argmax(np.abs(yf))
+            freqList.append(xf[idx])
+            
+        
+        return np.array(freqList)
     
     
 
