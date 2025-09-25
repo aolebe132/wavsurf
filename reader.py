@@ -35,14 +35,14 @@ class FileAnalyzer():
         num_samples = data.shape[0]
         duration_sec = (num_samples/sr)
         beats_total = int((duration_sec/60)*self.bpm)
-        divisions = beats_total*int(sr/10)
+        divisions = beats_total*int(sr/1000)
         print(f'{num_samples}, {duration_sec}, {beats_total}, {divisions}')
         freqList = []
         for st in range(divisions): 
             start_time = st*(duration_sec/divisions)
             end_time = start_time +(duration_sec/divisions)
             # Return a slice of the data from start_time to end_time
-            dataToRead = data[int(start_time * sr / 1000) : int(end_time * sr / 1000) + 1]
+            dataToRead = data[int(start_time * sr) : int(end_time * sr) + 1]
 
             # Fourier Transform
             N = len(dataToRead)
@@ -57,11 +57,22 @@ class FileAnalyzer():
             idx = np.argmax(np.abs(yf))
             freqList.append(xf[idx])
             
-        
-        return np.array(freqList)
+        filthy = np.array(freqList) 
+        return filthy[filthy != 0.0]
     
     def assignNotes(self):
         input = self.freq()
+        print(input)
+        output = []
+        for f in input:
+            ftop= f+10
+            fbot = f-10
+            for freq in self.ref.keys():
+                #print(f'{freq}, {f}')
+                if freq >=fbot and freq<=ftop:
+                    output.append(self.ref[freq])
+            
+        return np.array(output)
 
         
 
@@ -82,6 +93,6 @@ class FileAnalyzer():
         plt.show()
 
 reader = FileAnalyzer('./numb20.wav',63)
-
+print(reader.assignNotes())
 #print(reader.refTable)
 
