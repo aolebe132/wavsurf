@@ -35,14 +35,21 @@ class FileAnalyzer():
         num_samples = data.shape[0]
         duration_sec = (num_samples/sr)
         beats_total = int((duration_sec/60)*self.bpm)
-        divisions = beats_total*int(sr/1000)
-        print(f'{num_samples}, {duration_sec}, {beats_total}, {divisions}')
+        divisions = beats_total*int(128)
+        #spm = sr*60
+        #spb = spm/self.bpm
+        #spd = spb/128
+        samples_per_div = int((sr*60)/(self.bpm*128))
+
+        print(f'{num_samples}, {duration_sec}, {beats_total}, {divisions}, {samples_per_div}')
         freqList = []
         for st in range(divisions): 
-            start_time = st*(duration_sec/divisions)
-            end_time = start_time +(duration_sec/divisions)
+            start_time = st*samples_per_div
+            #print(start_time)
+            end_time = start_time + samples_per_div
+            #print(end_time)
             # Return a slice of the data from start_time to end_time
-            dataToRead = data[int(start_time * sr) : int(end_time * sr) + 1]
+            dataToRead = data[int(start_time) : int(end_time)]
 
             # Fourier Transform
             N = len(dataToRead)
@@ -65,8 +72,8 @@ class FileAnalyzer():
         print(input)
         output = []
         for f in input:
-            ftop= f+10
-            fbot = f-10
+            ftop= f+5
+            fbot = f-5
             for freq in self.ref.keys():
                 #print(f'{freq}, {f}')
                 if freq >=fbot and freq<=ftop:
