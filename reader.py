@@ -39,14 +39,14 @@ class FileAnalyzer():
         #spm = sr*60
         #spb = spm/self.bpm
         #spd = spb/128
-        samples_per_div = int((sr*60)/(self.bpm*128))
+        samples_per_div = int(((sr*60)/self.bpm)/128)
 
         print(f'{num_samples}, {duration_sec}, {beats_total}, {divisions}, {samples_per_div}')
         freqList = []
         for st in range(divisions): 
             start_time = st*samples_per_div
             #print(start_time)
-            end_time = start_time + samples_per_div
+            end_time = start_time + samples_per_div +1
             #print(end_time)
             # Return a slice of the data from start_time to end_time
             dataToRead = data[int(start_time) : int(end_time)]
@@ -64,19 +64,26 @@ class FileAnalyzer():
             idx = np.argmax(np.abs(yf))
             freqList.append(xf[idx])
             
-        filthy = np.array(freqList) 
-        return filthy[filthy != 0.0]
+        filthy = np.array(freqList)
+        np.savetxt('freq_out.txt',filthy,fmt='%.3f',delimiter=',')
+
+
+        #return filthy[filthy != 0.0]
+        return filthy
     
     def assignNotes(self):
         input = self.freq()
         print(input)
         output = []
+        keys = list(self.ref.keys())
+        
         for f in input:
-            ftop= f+5
-            fbot = f-5
-            for freq in self.ref.keys():
+            
+            for i in range(len(keys)-1):
                 #print(f'{freq}, {f}')
-                if freq >=fbot and freq<=ftop:
+                freq = keys[i]
+                fnext = keys[i+1]
+                if f>=freq and freq<=fnext:
                     output.append(self.ref[freq])
             
         return np.array(output)
@@ -100,6 +107,8 @@ class FileAnalyzer():
         plt.show()
 
 reader = FileAnalyzer('./numb20.wav',63)
-print(reader.assignNotes())
+output = reader.assignNotes()
+np.savetxt('out.txt',output,delimiter=',')
+
 #print(reader.refTable)
 
